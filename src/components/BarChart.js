@@ -59,16 +59,19 @@ const BarChart = ({ dataArray: data, keys, width, height, top, right, bottom, le
       .style('color', '#fff')
       .text('a simple tooltip');
 
+    // x0 function divides the X axis by the amount of data values
     const x0 = d3.scaleBand()
       .domain(data.map(d => d.date))
       .rangeRound([0, innerWidth])
       .padding(0.1)
 
+    // x1 function devides every x0 section by the amount of data sets
     const x1 = d3.scaleBand()
       .domain(keys)
       .rangeRound([0, x0.bandwidth()])
       .padding(0.05)
 
+    // Y function for first data set
     const y0 = d3.scaleLinear()
       .domain([
         0,
@@ -80,6 +83,7 @@ const BarChart = ({ dataArray: data, keys, width, height, top, right, bottom, le
         top
       ])
 
+    // Y function for second data set
     const y1 = d3.scaleLinear()
       .domain([
         0,
@@ -101,11 +105,13 @@ const BarChart = ({ dataArray: data, keys, width, height, top, right, bottom, le
       .data(d => keys.map(key => ({key, value: d[key]})))
       .join('rect')
         .attr('x', d => x1(d.key))
-        .attr('y', d => d.key === keys[0] ? y0(d.value) : y1(d.value))
         .attr('width', x1.bandwidth())
-        .attr('height', d => d.key === keys[0] ? y0(0) - y0(d.value) : y1(0) - y1(d.value))
+        // Y and Height start at 0 so the animation draw bars from bottom to top
+        .attr('y', d => d.key === keys[0] ? y0(0) : y1(0))
+        .attr('height', d => d.key === keys[0] ? y0(0) - y0(0) : y1(0) - y1(0))
         .attr('fill', d => color(d.key))
         .attr('cursor', 'pointer')
+        .attr('class', 'bar')
         // Listen on hover events on the bars to show or hide the tooltip
         .on('mouseover', function(e, d) {
           d3.select(this).transition().attr('fill', adjustColor(color(d.key), -40))
@@ -118,6 +124,14 @@ const BarChart = ({ dataArray: data, keys, width, height, top, right, bottom, le
           d3.select(this).transition().attr('fill', color(d.key))
           tooltip.html('').style('visibility', 'hidden')
         })
+    
+    // Bars load animation draws bars to their actual value
+    svg.selectAll(".bar")
+      .transition()
+      .duration(800)
+      .attr("y", d => d.key === keys[0] ? y0(d.value) : y1(d.value))
+      .attr("height", d => d.key === keys[0] ? y0(0) - y0(d.value) : y1(0) - y1(d.value))
+      .delay((d,i) => i * 50)
 
     // Append the X axis to the SVG
     svg.append('g')
