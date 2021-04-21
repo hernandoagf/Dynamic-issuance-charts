@@ -115,7 +115,7 @@ const BarChart = ({ dataArray: data, keys, width, height, top, right, bottom, le
         // Listen on hover events on the bars to show or hide the tooltip
         .on('mouseover', function(e, d) {
           d3.select(this).transition().attr('fill', adjustColor(color(d.key), -40))
-          tooltip.text(`${d.key}: ${d.value} HNY`).style('visibility', 'visible')
+          tooltip.text(`${d.key}: ${parseFloat(d.value).toFixed(1)} HNY`).style('visibility', 'visible')
         })
         .on('mousemove', e => {
           tooltip.style('top', e.pageY - 10 + 'px').style('left', e.pageX + 10 + 'px')
